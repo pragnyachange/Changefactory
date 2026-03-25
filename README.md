@@ -8,3 +8,8 @@ Git:
         git commit -m " message " 
         git push
         
+Javascript:
+// comments
+console.log = print 
+\n is new line 
+function name():
