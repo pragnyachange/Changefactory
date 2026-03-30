@@ -1,0 +1,14 @@
+{
+    "name": "pqf-ts-example",
+    "version": "0.0.1",
+    "description": "",
+    "author": "Intrasoft AG",
+    "type": "commonjs",
+    "main": "index.js",
+    "scripts": {
+        "build": "tsgo"
+    },
+    "devDependencies": {
+        "@typescript/native-preview": "^7.0.0-dev.20260323.1"
+    }
+}
