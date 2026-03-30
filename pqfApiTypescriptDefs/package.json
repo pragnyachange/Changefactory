@@ -1,0 +1,20 @@
+{
+    "name": "pqf-api-ts-def-generator",
+    "scripts": {
+        "build": "eslint src/generator.ts && tsgo",
+        "generate": "node dist/generator.js ApiV2.xml api.d.ts",
+        "lint": "eslint api.d.ts"
+    },
+    "dependencies": {
+        "xml-parser": "^1.2.1"
+    },
+    "devDependencies": {
+        "@eslint/js": "^10.0.1",
+        "@types/node": "^25.5.0",
+        "@types/xml-parser": "^1.2.33",
+        "@typescript/native-preview": "^7.0.0-dev.20260317.1",
+        "eslint": "^10.1.0",
+        "typescript": "^5.9.3",
+        "typescript-eslint": "^8.57.2"
+    }
+}
