@@ -1,0 +1,16 @@
+{
+  "type": "EnumType",
+  "id": "TIMEFRAME-TASKS-REASSESSMENT",
+  "name": [
+    {
+      "code": "en",
+      "text": "Timeframe Tasks Reassessment"
+    }
+  ],
+  "code": null,
+  "description": null,
+  "iconRef": null,
+  "color": null,
+  "validityStart": null,
+  "validityUntil": null
+}

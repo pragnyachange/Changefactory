@@ -1,0 +1,89 @@
+[
+  {
+    "type": "TIMEFRAME-TASKS-REASSESSMENT",
+    "id": "TIMEFRAME-TASKS-REASSESSMENT-001",
+    "name": [
+      {
+        "code": "en",
+        "text": "Past 7 Days"
+      },
+      {
+        "code": "de",
+        "text": "Letzte 7 Tage"
+      }
+    ],
+    "code": null,
+    "description": [
+      {
+        "code": "en",
+        "text": ""
+      },
+      {
+        "code": "de",
+        "text": ""
+      }
+    ],
+    "iconRef": null,
+    "color": null,
+    "validityStart": null,
+    "validityUntil": null
+  },
+  {
+    "type": "TIMEFRAME-TASKS-REASSESSMENT",
+    "id": "TIMEFRAME-TASKS-REASSESSMENT-002",
+    "name": [
+      {
+        "code": "en",
+        "text": "Past 14 Days"
+      },
+      {
+        "code": "de",
+        "text": "Letzte 14 Tage"
+      }
+    ],
+    "code": null,
+    "description": [
+      {
+        "code": "en",
+        "text": ""
+      },
+      {
+        "code": "de",
+        "text": ""
+      }
+    ],
+    "iconRef": null,
+    "color": null,
+    "validityStart": null,
+    "validityUntil": null
+  },
+  {
+    "type": "TIMEFRAME-TASKS-REASSESSMENT",
+    "id": "TIMEFRAME-TASKS-REASSESSMENT-003",
+    "name": [
+      {
+        "code": "en",
+        "text": "Since the start of the current month"
+      },
+      {
+        "code": "de",
+        "text": "Seit Beginn des aktuellen Monats"
+      }
+    ],
+    "code": null,
+    "description": [
+      {
+        "code": "en",
+        "text": ""
+      },
+      {
+        "code": "de",
+        "text": ""
+      }
+    ],
+    "iconRef": null,
+    "color": null,
+    "validityStart": null,
+    "validityUntil": null
+  }
+]

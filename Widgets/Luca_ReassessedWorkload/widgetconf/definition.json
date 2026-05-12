@@ -1,0 +1,46 @@
+{
+    "source": {"category": "js"},
+    "config": {
+        "view": "table" ,
+        "lifecycle" : true,
+        "colorscheme": "poly",
+        "decimals": 2,
+        "legend": {"show": true,"pos": null},
+        "showHeader": true,
+        "properties": [
+            {
+                "type": "group",
+                "title": [{"code": "en", "text": "Timeframe"}, {"code": "de", "text": "Zeitraum"}]
+            },
+            {
+                "id": "timerange",
+                "type": "enum",
+                "label": [
+                    { 
+                        "code": "en", 
+                        "text": "Timeframe"
+                    }, 
+                    { 
+                        "code": "de", 
+                        "text": "Zeitraum"
+                    }
+                ],
+                "hint": [
+                    {
+                        "code": "en",
+                        "text": "Select the timeframe for which the tasks that have been reassessed should be displayed."
+                    },
+                    {
+                        "code": "de",
+                        "text": "Wählen Sie den Zeitraum, in dem die neu bewerteten Aufgaben angezeigt werden sollen."
+                    }
+                ],
+                "sourceUrl": "/API/V2/PF/Enum/TIMEFRAME-TASKS-REASSESSMENT/Values",
+                "selectedItem": "TIMEFRAME-TASKS-REASSESSMENT-001"
+            }
+        ]
+    },
+    "projectStatusFilter" : null,
+    "options": {"disableFilter": false,"disableSorting": false},
+    "canReload": false
+}

@@ -1,0 +1,35 @@
+{
+    "name": "widget",
+    "version": "1.0.0",
+    "description": "",
+    "license": "ISC",
+    "author": "",
+    "type": "commonjs",
+    "main": "dist/",
+    "scripts": {
+        "build_js": "eslint src/*.ts && tsgo && gulp",
+        "deploy_js": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/deploy_js.ps1",
+        "buildAndDeploy_js": "npm run build_js && npm run deploy_js",
+        "test": "jest"
+    },
+    "devDependencies": {
+        "@eslint/js": "^10.0.1",
+        "@types/jest": "^30.0.0",
+        "@types/moment": "^2.11.29",
+        "@types/node": "^25.5.0",
+        "@typescript/native-preview": "^7.0.0-dev.20260317.1",
+        "eslint": "^10.1.0",
+        "gulp": "^5.0.1",
+        "gulp-concat": "^2.6.1",
+        "gulp-replace": "^1.1.4",
+        "gulp-uglify": "^3.0.2",
+        "jest": "^30.3.0",
+        "parcel": "^2.16.4",
+        "ts-jest": "^29.4.9",
+        "typescript": "^5.9.3",
+        "typescript-eslint": "^8.57.2"
+    },
+    "dependencies": {
+        "moment": "^2.30.1"
+    }
+}
