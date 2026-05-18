@@ -1,0 +1,252 @@
+[
+	{
+		"type": "IMPORT-OBJECT-TYPE",
+		"id": "IMPORT-OBJECT-TYPE-PRJ",
+		"name": [
+			{
+				"code": "en",
+				"text": "Projects"
+			},
+			{
+				"code": "de",
+				"text": "Projekte"
+			}
+		],
+		"code": null,
+		"description": null,
+		"iconRef": [
+			{
+				"code": "en",
+				"text": "mdi:file-document-box-multiple"
+			}
+		],
+		"color": null,
+		"validityStart": null,
+		"validityUntil": null
+	},
+	{
+		"type": "IMPORT-OBJECT-TYPE",
+		"id": "IMPORT-OBJECT-TYPE-PRJ-SCO",
+		"name": [
+			{
+				"code": "en",
+				"text": "Project Scenarios"
+			},
+			{
+				"code": "de",
+				"text": "Projekt-Szenarien"
+			}
+		],
+		"code": null,
+		"description": null,
+		"iconRef": [
+			{
+				"code": "en",
+				"text": "mdi:chart-gantt"
+			}
+		],
+		"color": null,
+		"validityStart": null,
+		"validityUntil": null
+	},
+	{
+		"type": "IMPORT-OBJECT-TYPE",
+		"id": "IMPORT-OBJECT-TYPE-PRJ-WORKITEM",
+		"name": [
+			{
+				"code": "en",
+				"text": "Project Tasks"
+			},
+			{
+				"code": "de",
+				"text": "Projekt-Tasks"
+			}
+		],
+		"code": null,
+		"description": null,
+		"iconRef": [
+			{
+				"code": "en",
+				"text": "mdi:chart-gantt"
+			}
+		],
+		"color": null,
+		"validityStart": null,
+		"validityUntil": null
+	},
+	{
+		"type": "IMPORT-OBJECT-TYPE",
+		"id": "IMPORT-OBJECT-TYPE-PRJ-REL",
+		"name": [
+			{
+				"code": "en",
+				"text": "Project Relations"
+			},
+			{
+				"code": "de",
+				"text": "Projekt-Beziehungen"
+			}
+		],
+		"code": null,
+		"description": null,
+		"iconRef": [
+			{
+				"code": "en",
+				"text": "mdi:link-variant"
+			}
+		],
+		"color": null,
+		"validityStart": null,
+		"validityUntil": null
+	},
+	{
+		"type": "IMPORT-OBJECT-TYPE",
+		"id": "IMPORT-OBJECT-TYPE-PORTF-REL",
+		"name": [
+			{
+				"code": "en",
+				"text": "Portfolio Relations"
+			},
+			{
+				"code": "de",
+				"text": "Portfolio-Beziehungen"
+			}
+		],
+		"code": null,
+		"description": null,
+		"iconRef": [
+			{
+				"code": "en",
+				"text": "mdi:link-variant"
+			}
+		],
+		"color": null,
+		"validityStart": null,
+		"validityUntil": null
+	},
+	{
+		"type": "IMPORT-OBJECT-TYPE",
+		"id": "IMPORT-OBJECT-TYPE-PRJ-CST-ACT",
+		"name": [
+			{
+				"code": "en",
+				"text": "Project Costs Actuals"
+			},
+			{
+				"code": "de",
+				"text": "Projekt-Ist-Kosten"
+			}
+		],
+		"code": null,
+		"description": null,
+		"iconRef": [
+			{
+				"code": "en",
+				"text": "mdi:coin"
+			}
+		],
+		"color": null,
+		"validityStart": null,
+		"validityUntil": null
+	},
+	{
+		"type": "IMPORT-OBJECT-TYPE",
+		"id": "IMPORT-OBJECT-TYPE-PRJ-EFF-ACT",
+		"name": [
+			{
+				"code": "en",
+				"text": "Project Efforts"
+			},
+			{
+				"code": "de",
+				"text": "Projekt-Leistungen"
+			}
+		],
+		"code": null,
+		"description": null,
+		"iconRef": [
+			{
+				"code": "en",
+				"text": "mdi:timer"
+			}
+		],
+		"color": null,
+		"validityStart": null,
+		"validityUntil": null
+	},
+	{
+		"type": "IMPORT-OBJECT-TYPE",
+		"id": "IMPORT-OBJECT-TYPE-RES-HRM-EMP",
+		"name": [
+			{
+				"code": "en",
+				"text": "Employees"
+			},
+			{
+				"code": "de",
+				"text": "Mitarbeitende"
+			}
+		],
+		"code": null,
+		"description": null,
+		"iconRef": [
+			{
+				"code": "en",
+				"text": "mdi:account"
+			}
+		],
+		"color": null,
+		"validityStart": null,
+		"validityUntil": null
+	},
+	{
+		"type": "IMPORT-OBJECT-TYPE",
+		"id": "IMPORT-OBJECT-TYPE-RES-HRM-OU",
+		"name": [
+			{
+				"code": "en",
+				"text": "Organisation Units"
+			},
+			{
+				"code": "de",
+				"text": "Organisationseinheiten"
+			}
+		],
+		"code": null,
+		"description": null,
+		"iconRef": [
+			{
+				"code": "en",
+				"text": "mdi:account-multiple"
+			}
+		],
+		"color": null,
+		"validityStart": null,
+		"validityUntil": null
+	},
+	{
+		"type": "IMPORT-OBJECT-TYPE",
+		"id": "IMPORT-OBJECT-TYPE-ALLOC",
+		"name": [
+			{
+				"code": "en",
+				"text": "Allocations"
+			},
+			{
+				"code": "de",
+				"text": "Allokationen"
+			}
+		],
+		"code": null,
+		"description": null,
+		"iconRef": [
+			{
+				"code": "en",
+				"text": "mdi:table-plus"
+			}
+		],
+		"color": null,
+		"validityStart": null,
+		"validityUntil": null
+	}
+]

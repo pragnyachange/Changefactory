@@ -1,0 +1,53 @@
+
+{
+	"type": "CockpitWidget",
+	"id": "C501F4C74A044D329AF81C0DD9A4F736",
+	"name": [
+		{
+			"code": "en",
+			"text": "Resource List"
+        },
+        {
+            "code": "de",
+            "text": "Ressourcenliste"
+        }
+	],
+	"code": "EXAMPLE01",
+	"description": [
+		{
+			"code": "en",
+			"text": "Displays a list of resources."
+        },
+        {
+            "code": "de",
+            "text": "Zeigt eine Liste von Ressourcen an."
+        }
+	],
+	"iconRef": [
+		{
+			"code": "en",
+			"text": "/images/cockpit-table.png"
+		}
+	],
+	"color": null,
+	"validityStart": null,
+	"validityUntil": null,
+	"objectType": "HRM-RES-TYP-OU",
+	"widgetType": "jtf",
+	"definition": "{\r\n    \"source\": {\"category\": \"js\"},\r\n    \"config\": {\r\n        \"view\": \"table\",\r\n        \"lifecycle\": false,\r\n        \"colorscheme\": \"poly\",\r\n        \"decimals\": 0,\r\n        \"legend\": {\"show\": true,\"pos\": null},\r\n        \"showHeader\": true, \r\n        \"dateRange\": {\r\n           \"startDate\": { \"unit\": \"MONTH\", \"delta\": -2 },\r\n           \"duration\": { \"unit\": \"MONTH\", \"amount\": 2 }\r\n       },\r\n       \"properties\": [\r\n            { \r\n                \"id\": \"include_subOUs\", \r\n                \"name\": [\r\n                    { \"code\": \"en\", \"text\": \"Incl. Sub-OUs\"},\r\n                    { \"code\": \"de\", \"text\": \"Inkl. Sub-OUs\"}\r\n                ],\r\n                \"type\": \"checkbox\",\r\n                \"value\": false,\r\n                \"options\": {}\r\n            }\r\n        ],\r\n        \"chart_label\": true,\r\n        \"labels\": {\r\n            \"general\": true,\r\n            \"percentage\": true\r\n        }\r\n    },\r\n    \"options\": {\"disableFilter\": false,\"disableSorting\": true},\r\n    \"canReload\": true\r\n}",
+	"sortIndex": 1,
+	"tags": [
+		[
+			{
+                "code": "en",
+                "text": "Resources"
+			},
+            {
+                "code": "de",
+                "text": "Ressourcen"
+            }
+		]
+	],
+	"category": null,
+	"sandboxId": "94F36F9798024E63AF8EAF58ED2AE5B2" 
+} 

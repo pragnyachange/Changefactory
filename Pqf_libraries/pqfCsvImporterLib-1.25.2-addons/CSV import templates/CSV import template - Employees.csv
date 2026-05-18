@@ -1,0 +1,2 @@
+﻿Resource/HRM-RES-TYP-OU/org-code:prop:parentRef;Resource/HRM-RES-TYP-EMP/id;Resource/HRM-RES-TYP-EMP/name;Resource/HRM-RES-TYP-EMP/emp-sap-no:prop:objectRef;Resource/HRM-RES-TYP-EMP/email;Resource/HRM-RES-TYP-EMP/linkType;User/name:targetRef;User/id:targetRef;Resource/HRM-RES-TYP-EMP/location;Validation/executed;Validation/info
+Parent-Ressource-Referenz (hier ein Property);Hier schreibt das System die Ressource-ID zurück;;Ressourcen-Referenz (hier ein Property);;HRM-RES-LNK-TYP-EMP;;;;;

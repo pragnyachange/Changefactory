@@ -1,0 +1,38 @@
+{
+    "source": {"category": "js"},
+    "config": {
+        "view": "table",
+        "lifecycle": false,
+        "colorscheme": "poly",
+        "decimals": 0,
+        "legend": {"show": true,"pos": null},
+        "showHeader": true, 
+        "dateRange": null,
+       "properties": [
+            {
+                "type": "group", 
+                "title": [
+                    {"code": "en", "text": "Settings"}, 
+                    {"code": "de", "text": "Einstellungen"} 
+                ]
+            },
+            { 
+                "id": "include_subOUs", 
+                "name": [
+                    { "code": "en", "text": "Incl. Sub-OUs"},
+                    { "code": "de", "text": "Inkl. Sub-OUs"}
+                ],
+                "type": "checkbox",
+                "value": false,
+                "options": {}
+            }
+        ],
+        "chart_label": true,
+        "labels": {
+            "general": true,
+            "percentage": true
+        }
+    },
+    "options": {"disableFilter": false,"disableSorting": true},
+    "canReload": true
+}

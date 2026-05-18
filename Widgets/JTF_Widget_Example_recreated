@@ -1,0 +1,165 @@
+
+
+/*
+Author(s): LI
+
+Description:
+    This is a PQFORCE JTF (JSON Table Format) widget that:
+
+- Shows a list of employees in an Organizational Unit (OU)
+- Displays their name + email
+-  Optionally includes sub-OUs recursively
+
+DB Instructions:
+    -   Sandbox
+        -   [JavaScriptSourceCodeId] = "94F36F9798024E63AF8EAF58ED2AE5B2"
+    -   Resource List Widget
+        -   [CockpitWidgetId] = "51848189F1A940BDA3F4E065DA92318A"
+
+Libraries: 
+    -   MOMENT
+
+*/
+// enables JS strict mode, which helps to write more secure JavaScript code by throwing errors for unsafe actions (e.g., using undeclared variables).
+"use strict";
+
+//set locale for moment.js to German, which affects how dates and times are formatted and displayed in the widget. This is important for ensuring that any date-related information is presented in a way that is familiar to German-speaking users.
+moment.locale("de");
+
+// Parameters and global variables ##################################################################
+//DEBUG = prints logs in console and hints = collects warnings for UI 
+
+const DEBUG = true;
+
+let hints = [];
+
+// READ SETTINGS ###############################################################
+/**
+ * Read the client settings. ie the widget configuration defined in the cockpit. This is important for making the widget adaptable to different use cases without changing the code, by simply adjusting the settings in the cockpit.
+ */
+
+DEBUG ? console.log("client: " + JSON.stringify(client)) : null;
+
+// controls whether only direct OU members or all nested OU members recursively are included
+let incl_subOUs = client.config.properties.find(prop => prop.id === "include_subOUs").value;
+
+
+// LOAD DATA ###################################################################
+/**
+ * Load JTF data, typically by calling a function from the jtf-section in
+ * pqfDataCollectorLib. 
+ * 
+ * this defines the table ie JTF structure 
+ */
+
+let jtf = {
+    "meta": {
+        "options": {
+            "adaptiveColumnWidths": true,
+            "groupBy": null,
+            "sortBy": { "columnId": "name_col", "direction": "ASC" }
+        },
+        "categories": [
+            { "id": "res_cat", "label": null}
+        ],
+        "columns": [
+            {
+                "id": "name_col",
+                "catid": "res_cat",
+                "type": "enum",
+                "label": { "en": "Name", "de": "Name" },
+                "options": { "width": 200 },
+                // makes names clickable ie opens resource details
+                "format": { "showIcon": true, "addLink": "details" }
+            },
+            {
+                "id": "email_col",
+                "catid": "res_cat",
+                "type": "string",
+                "label": { "en": "E-Mail", "de": "E-Mail" },
+                "options": { "width": 200 }
+            },
+        ]
+    },
+    "data": []
+}
+
+// load resources of the OU using _getResObjs
+// reference.id is the current OU ID and filters ie HRM-RES-TYP-EMP ensures that only employees are included in the list. The resulting resource objects are then transformed into rows for the JTF, where the name column is formatted as an enum (to include icons and links) and the email column is extracted from the resource properties.
+let resObjs = _getResObjs(reference.id, incl_subOUs).filter(resObj => resObj.type === "HRM-RES-TYP-EMP");
+resObjs.forEach(resObj => {
+    // for each employee a row is created with a unique ID, the name formatted as an enum (_toEnum),
+    //  and the email extracted from the resource properties.
+    //  These rows are then added to the JTF data array, which will be rendered in the widget.
+    let row = {
+        "id": Pqf.clf.newUuids(1).newUuids[0],
+        "data": [_toEnum(resObj), resObj.properties.find(prop => prop.key === "emp-email").value]
+    };
+    jtf.data.push(row);
+});
+
+// ADD CHARTS ##################################################################
+/**
+ * Add charts to the JTF.
+ */
+
+// RETURN JTF ##################################################################
+/**
+ * Return resulting JTF object.
+ */
+
+//jtf.hints = hints; // Only added in 4.25.6
+// if DEBUG true then prints full jtf object to console else nothing
+DEBUG ? console.log("jtf: " + JSON.stringify(jtf)) : null;
+jtf; // return the widget 
+
+// FUNCTIONS ###################################################################
+/**
+ * Set of function definitions that are specific to this widget.
+ */
+
+// recursively loads resources of an OU and optionally its sub-OUs, while filtering for duplicates. This is crucial for ensuring that the widget can display all relevant employees when the user opts to include sub-OUs, without showing the same employee multiple times if they belong to multiple OUs.
+function _getResObjs(ouId, incl_subOUs) {
+    // Load all child resource of this OU
+    let resObjs = [];
+    try {
+        //gets everything under the OU so employees but also sub OUs and their employees, which is why we need to filter for the employee type later on
+        resObjs = Pqf.res.getResourceChildren(ouId);
+    } catch {
+        // handle errors
+        hints.push({
+            "type": "warn",
+            "label": "Resource Load Warning",
+            "message": "Failed to load child-resources of OU with ID " + ouId
+        })
+    }
+    if (!resObjs || resObjs.length === 0) {
+        return [];
+    }
+    // If the user wants to consider sub OUs, load all resources of the OU and its children -> builds a tree traversal
+    if (incl_subOUs) {
+        resObjs.forEach(child => {
+            resObjs = resObjs.concat(_getResObjs(child.id, incl_subOUs));
+        });
+    }
+    // Filter duplicate resource enums
+    resObjs = resObjs.filter((resObj, index, self) =>
+        index === self.findIndex((r) => r.id === resObj.id)
+    );
+    
+    return resObjs;
+}
+
+function _toEnum(obj) {
+    if (!obj) {
+        return null;
+    }
+    return {
+        'type': obj.type,
+        'id': obj.id,
+        'name': obj.name,
+        'description': obj.description,
+        'iconRef': obj.iconRef,
+        'color': obj.color
+    };
+}

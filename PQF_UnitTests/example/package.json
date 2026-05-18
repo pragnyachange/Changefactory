@@ -1,0 +1,26 @@
+{
+    "name": "pqf-ts-example",
+    "version": "0.0.1",
+    "description": "",
+    "author": "Intrasoft AG",
+    "type": "commonjs",
+    "main": "script.js",
+    "scripts": {
+        "build": "eslint src/*.ts && tsgo && gulp",
+        "test": "jest",
+        "clean": "rm -rf dist script.js",
+        "clean-all": "npm run clean && rm -rf node_modules"
+    },
+    "devDependencies": {
+        "@eslint/js": "^10.0.1",
+        "@types/jest": "^30.0.0",
+        "@typescript/native-preview": "^7.0.0-dev.20260323.1",
+        "eslint": "^10.1.0",
+        "gulp": "^5.0.1",
+        "gulp-concat": "^2.6.1",
+        "gulp-replace": "^1.1.4",
+        "gulp-uglify": "^3.0.2",
+        "jest": "^30.3.0",
+        "ts-jest": "^29.4.9"
+    }
+}

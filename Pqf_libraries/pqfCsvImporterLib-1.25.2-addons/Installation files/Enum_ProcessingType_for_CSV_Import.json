@@ -1,0 +1,118 @@
+[
+	{
+		"type": "IMPORT-PROCESSING-TYPE",
+		"id": "IMPORT-PROCESSING-TYPE-RES",
+		"name": [
+			{
+				"code": "de",
+				"text": "Validierungsinfos zurücksetzen"
+			},
+			{
+				"code": "en",
+				"text": "Reset validation info"
+			}
+		],
+		"code": null,
+		"description": null,
+		"iconRef": [
+			{
+				"code": "de",
+				"text": "mdi:undo"
+			},
+			{
+				"code": "en",
+				"text": "mdi:undo"
+			}
+		],
+		"color": "#48474a",
+		"validityStart": null,
+		"validityUntil": null
+	},
+	{
+		"type": "IMPORT-PROCESSING-TYPE",
+		"id": "IMPORT-PROCESSING-TYPE-VAL",
+		"name": [
+			{
+				"code": "de",
+				"text": "Validieren"
+			},
+			{
+				"code": "en",
+				"text": "Validate"
+			}
+		],
+		"code": null,
+		"description": null,
+		"iconRef": [
+			{
+				"code": "de",
+				"text": "mdi:checkbox-marked-outline"
+			},
+			{
+				"code": "en",
+				"text": "mdi:checkbox-marked-outline"
+			}
+		],
+		"color": "#2d03aa",
+		"validityStart": null,
+		"validityUntil": null
+	},
+	{
+		"type": "IMPORT-PROCESSING-TYPE",
+		"id": "IMPORT-PROCESSING-TYPE-IMP",
+		"name": [
+			{
+				"code": "de",
+				"text": "Importieren/aktualisieren"
+			},
+			{
+				"code": "en",
+				"text": "Import/update"
+			}
+		],
+		"code": null,
+		"description": null,
+		"iconRef": [
+			{
+				"code": "de",
+				"text": "mdi:import"
+			},
+			{
+				"code": "en",
+				"text": "mdi:import"
+			}
+		],
+		"color": "#239104",
+		"validityStart": null,
+		"validityUntil": null
+	},
+	{
+		"type": "IMPORT-PROCESSING-TYPE",
+		"id": "IMPORT-PROCESSING-TYPE-DEL",
+		"name": [
+			{
+				"code": "de",
+				"text": "Löschen"
+			},
+			{
+				"code": "en",
+				"text": "Delete"
+			}
+		],
+		"code": null,
+		"description": null,
+		"iconRef": [
+			{
+				"code": "de",
+				"text": "mdi:delete"
+			},
+			{
+				"code": "en",
+				"text": "mdi:delete"
+			}
+		],
+		"color": "#aa0006",
+		"validityStart": null,
+		"validityUntil": null
+	}
+]

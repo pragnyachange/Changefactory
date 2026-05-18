@@ -1,0 +1,614 @@
+/**
+ * SOURCE MAPPING COMMENTS EXPLAINED (to be removed before sandbox deployment):
+ * //# sourceMappingURL=*.js.map are debugging comments used during development
+ * They link compiled JavaScript back to original source code for debugging in browser DevTools
+ * These .map files are NOT needed in production/sandbox environments and should be removed
+ */
+
+/**
+ * Helper: Create bilingual (German/English) label objects
+ * @param {string} deStr - German text
+ * @param {string} enStr - English text
+ * @returns {object} Object with 'de' and 'en' properties
+ * @example jtfCodeDeEn("Aufgabe", "Task") returns { de: "Aufgabe", en: "Task" }
+ */
+/* export */ function jtfCodeDeEn(deStr, enStr) {
+
+    return {
+
+        de: deStr,
+
+        en: enStr
+
+    };
+
+}
+
+/**
+ * Helper: Build JTF (PQForce table format) response object
+ * @param {object} meta - Metadata (options, columns, categories)
+ * @param {array} data - Table row data
+ * @param {array} charts - Chart definitions (optional, defaults to [])
+ * @param {array} hints - Warning/info messages for UI (optional, defaults to [])
+ * @returns {object} Complete JTF object ready for widget display
+ */
+/* export */ function constructJtfObject(meta, data, charts = [], hints = []) {
+
+    return {
+
+        meta: meta,
+
+        data: data,
+
+        charts: charts,
+
+        hints: hints
+
+    };
+
+}
+
+;
+
+/**
+ * Helper: Create JTF metadata object
+ * @param {object} options - Display options (adaptive widths, show headers, etc)
+ * @param {array} columns - Column definitions with IDs, labels, types
+ * @param {array} categories - Column categories/groupings
+ * @returns {object} Metadata for JTF widget
+ */
+/* export */ function constructJtfMeta(options, columns, categories) {
+
+    return {
+
+        options: options,
+
+        columns: columns,
+
+        categories: categories
+
+    };
+
+}
+
+;
+
+/**
+ * Helper: Convert PQForce object to JTF enum format
+ * Extracts enum-relevant fields and marks deleted items
+ * @param {object} obj - PQForce object (task, user, etc)
+ * @returns {object|null} Enum object with type, id, name, description, icon, color
+ */
+/* export */ function _toEnum(obj) {
+
+    if (!obj) {
+
+        return null;
+
+    }
+
+    // Mark deleted items with "(deleted)" suffix
+    if ("isDeleted" in obj)
+
+        obj.name = (obj.isDeleted ? " (deleted)" : "");
+
+    return {
+
+        'type': obj.type,
+
+        'id': obj.id,
+
+        'name': obj.name,
+
+        'description': obj.description,
+
+        'iconRef': obj.iconRef,
+
+        'color': obj.color
+
+    };
+
+}
+
+/**
+ * ============================================================================
+ * REASSESSED TASKS WIDGET
+ * ============================================================================
+ * @name Reassessed Tasks Widget
+ * @version 1.0.0
+ * @description Displays all tasks within a selected timeframe that have had 
+ *              their effort reassessed (progress corrections), showing old vs new effort
+ * @author LI
+ * @sandboxId 82F6A863771E4D839876BF6668BD3E08
+ * @widgetId 89A532D20F584726840B9BCBCDB097C4
+ * @created 2026-04-21
+ * @modified 2026-04-21
+ * @requires MOMENT_WITH_LOCALES - Moment.js for date/time handling
+ * ============================================================================
+ */
+
+// ============================================================================
+// CONFIGURATION CONSTANTS
+// ============================================================================
+
+/** Enable debug logging to browser console */
+const DEBUG = true;
+
+/** The widget property ID that holds the selected timeframe from the dropdown */
+const TIMERANGE_PROP_ID = "timerange";
+
+/**
+ * Maps enum value IDs to their corresponding time durations
+ * - 001: Past 7 days
+ * - 002: Past 14 days
+ * - 003: From start of current month to today (calculated as day-of-month minus 1)
+ */
+const TIMERANGE_VALUE_MAP = {
+
+    "TIMEFRAME-TASKS-REASSESSMENT-001": { duration: moment.duration(7, 'days') },
+
+    "TIMEFRAME-TASKS-REASSESSMENT-002": { duration: moment.duration(14, 'days') },
+
+    "TIMEFRAME-TASKS-REASSESSMENT-003": { duration: moment.duration(moment().date() - 1, 'days') }
+
+};
+
+/** Default timeframe if none selected (Past 7 Days) */
+const TIMERANGE_DEFAULT_KEY = "TIMEFRAME-TASKS-REASSESSMENT-001";
+
+/** Default duration fallback */
+const TIMERANGE_DEFAULT_DURATION = TIMERANGE_VALUE_MAP[TIMERANGE_DEFAULT_KEY]?.duration;
+
+/**
+ * JTF Table display options
+ * adaptiveColumnWidths: false = use fixed column widths defined per column
+ * showHeader: true = display column headers in table
+ */
+const options = {
+
+    adaptiveColumnWidths: false,
+
+    showHeader: true
+
+};
+
+/**
+ * JTF Column categories (groupings)
+ * Most columns use "/* default " category (no grouping)
+ */
+
+const cats = [
+
+    {
+
+        id: '/* default */',
+
+        label: null
+
+    }
+
+];
+
+/**
+ * ============================================================================
+ * TABLE COLUMNS DEFINITION - JTF FORMAT
+ * ============================================================================
+ * Each column defines what data displays in the table
+ * The order here matches the order in jtfData rows (see createWidget function)
+ */
+const columns = [
+
+    /**
+     * COLUMN 1: Task
+     * Displays task/work item name with clickable link to gantt chart
+     * Shows icon for work item type
+     * Width: 300px (resizable)
+     * Background: light gray (#eee)
+     */
+    {
+
+        catid: "/* default */",
+
+        id: "task",
+
+        label: jtfCodeDeEn('Task', 'Task'),
+
+        type: "enum",  // enum type can show icons and links
+
+        options: {
+
+            resizable: true,
+
+            width: 300
+
+        },
+
+        format: {
+
+            showIcon: true,    // Display work item type icon
+
+            addLink: true      // Make task name clickable -> links to gantt
+
+        },
+
+        style: {
+
+            backgroundColor: "#eee"
+
+        }
+
+    },
+
+    /**
+     * COLUMN 2: New Effort (Aufwand neu)
+     * The reassessed/updated remaining effort value
+     * Duration type = shows hours/days/weeks
+     * No aggregation (shows individual values only)
+     * Width: 100px
+     */
+    {
+
+        catid: "/* default */",
+
+        id: "remainingEffort_new",
+
+        label: jtfCodeDeEn('Aufwand (neu)', 'Effort (new)'),
+
+        type: "duration",
+
+        options: {
+
+            width: 100,
+
+            aggregation: "none"
+
+        }
+
+    },
+
+    /**
+     * COLUMN 3: Old Effort (Aufwand alt)
+     * The previous/original remaining effort (before reassessment)
+     * Allows user to compare and see what changed
+     * Duration type = shows hours/days/weeks
+     * Width: 100px
+     */
+    {
+
+        catid: "/* default */",
+
+        id: "remainingEffort_old",
+
+        label: jtfCodeDeEn('Aufwand (alt)', 'Effort (old)'),
+
+        type: "duration",
+
+        options: {
+
+            width: 100,
+
+            aggregation: "none"
+
+        }
+
+    },
+
+    /**
+     * COLUMN 4: Timestamp
+     * When the reassessment was made
+     * Date type with custom format: DD.MM.YYYY (e.g., 11.05.2026)
+     * Width: 100px
+     */
+    {
+
+        catid: "/* default */",
+
+        id: "timestamp",
+
+        label: jtfCodeDeEn('Zeitstempel', 'Timestamp'),
+
+        type: "date",
+
+        options: {
+
+            width: 100
+
+        },
+
+        format: {
+
+            format: "DD.MM.YYYY"
+
+        }
+
+    },
+
+    /**
+     * COLUMN 5: User
+     * Who made the reassessment
+     * Enum type shows user icon and name
+     * Link disabled (no link to user profile)
+     * Width: 200px
+     */
+    {
+
+        catid: "/* default */",
+
+        id: "user",
+
+        label: jtfCodeDeEn('User', 'User'),
+
+        type: "enum",
+
+        options: {
+
+            width: 200
+
+        },
+
+        format: {
+
+            showIcon: true,     // Display user avatar/icon
+
+            addLink: false      // No clickable link to user profile
+
+        }
+
+    }
+
+];
+
+/**
+ * ============================================================================
+ * MAIN WIDGET CREATION FUNCTION
+ * ============================================================================
+ * Main logic that processes project data and builds the reassessment table
+ * Called with 'client' object containing widget settings and user context
+ * 
+ * @param {object} settings - Widget configuration and runtime settings
+ * @returns {object} JTF object ready for rendering in widget
+ */
+function createWidget(settings) {
+
+    /** Container for table row data */
+    const jtfData = [];
+
+    /** Container for warning/info messages to display in widget */
+    const jtfHints = [];
+
+    // ========================================================================
+    // STEP 1: Load the project
+    // ========================================================================
+    // Gets the project based on context (e.g., which project user has open)
+    // Uses settings.selectedObject.id to identify the project
+
+    const prj = (() => {
+
+        try {
+
+            return Pqf.pm.getProject(settings.selectedObject.id);
+
+        }
+
+        catch {
+
+            // If project fails to load, add warning message for user
+            jtfHints.push({
+
+                type: "warning",
+
+                label: jtfCodeDeEn("Ladefehler", "Loading error"),
+
+                text: jtfCodeDeEn("Das Projekt konnte nicht geladen werden.", "The project could not be loaded.")
+
+            });
+
+            return null;
+
+        }
+
+    })();
+
+    // ========================================================================
+    // STEP 2: Load the project's active scenario
+    // ========================================================================
+    // A scenario is a version/variant of the project plan
+    // We only process if project was successfully loaded
+    // false param = include single inactive scenarios
+
+    const scen = prj ?
+
+        (() => {
+
+            try {
+
+                return Pqf.pm.getProjectActiveScenario(prj.id, false);
+
+            }
+
+            catch {
+
+                // If scenario load fails, add warning
+                jtfHints.push({
+
+                    type: "warning",
+
+                    label: jtfCodeDeEn("Ladefehler", "Loading error"),
+
+                    text: jtfCodeDeEn("Das Szenario konnte nicht geladen werden. Kann sein, dass kein aktives Szenario vorhanden ist.", "The scenario could not be loaded. It may be that no active scenario is available.")
+
+                });
+
+                return null;
+
+            }
+
+        })() : null;  // null if project is null (skip if project load failed)
+
+    // ========================================================================
+    // STEP 3: Load all work items (tasks) in the scenario
+    // ========================================================================
+    // Gets all tasks/phases/work items in the selected scenario
+    // true param = include all items in hierarchy
+
+    const workItems = scen ?
+
+        (() => {
+
+            try {
+
+                return Pqf.pm.getScenarioWorkItems(scen.id, true);
+
+            }
+
+            catch {
+
+                // If work items fail to load, add warning
+                jtfHints.push({
+
+                    type: "warning",
+
+                    label: jtfCodeDeEn("Ladefehler", "Loading error"),
+
+                    text: jtfCodeDeEn("Die Tasks konnten nicht geladen werden.", "The tasks could not be loaded.")
+
+                });
+
+                return [];  // Return empty array to continue processing
+
+            }
+
+        })() : [];  // Return empty array if scenario is null
+
+    // ========================================================================
+    // STEP 4: Process work items and find reassessments
+    // ========================================================================
+    if (workItems.length > 0) {
+
+        // Get the selected timeframe from widget settings
+        // If not set, use default (Past 7 Days)
+        const timerange = TIMERANGE_VALUE_MAP[settings.config.properties.find(prop => prop.id === TIMERANGE_PROP_ID)?.selectedItem || TIMERANGE_DEFAULT_KEY]?.duration;
+
+        // Calculate the start date of the selected timeframe
+        // Example: If timerange is 7 days, start = now - 7 days at 00:00:00
+        const timeFrameStart = moment().subtract(timerange || TIMERANGE_DEFAULT_DURATION).startOf('day');
+
+        console.log("timeFrameStart: " + timeFrameStart.toISOString());
+
+        // Process each work item
+        workItems.forEach(workItem => {
+
+            // Get all historical effort reassessments (progress corrections) for this task
+            const progressCorrections = Pqf.pm.getProjectWorkItemProgressCorrections(workItem.id);
+
+            // ================================================================
+            // Find the MOST RECENT reassessment
+            // ================================================================
+            // Uses reduce() to iterate through timeline and find the latest one
+            // (highest timestamp value)
+            const currentProgressCorrection = progressCorrections.timeline.reduce((acc, current) => {
+
+                if (!acc)
+                    return current;  // First iteration: use first item
+
+                // Keep the one with later timestamp
+                return moment(current.at).isAfter(acc.at) ? current : acc;
+
+            }, null);
+
+            // ================================================================
+            // Filter: Only include if reassessment is within selected timeframe
+            // ================================================================
+            // Only process this task if:
+            // 1. It has at least one reassessment (currentProgressCorrection exists)
+            // 2. The reassessment date is AFTER the timeframe start
+            if (currentProgressCorrection && moment(currentProgressCorrection.at).isAfter(timeFrameStart)) {
+
+                // ============================================================
+                // Find the PREVIOUS reassessment for comparison
+                // ============================================================
+                // Shows what the effort was BEFORE the current reassessment
+                // Uses reduce() to find the latest correction that's BEFORE current one
+                const previousProgressCorrection = progressCorrections.timeline.reduce((acc, current) => {
+
+                    if (!acc)
+                        // First iteration: only include if before current
+                        return moment(current.at).isBefore(currentProgressCorrection.at) ? current : null;
+
+                    // Keep the one with latest timestamp that's still before current
+                    return moment(current.at).isAfter(acc.at) && moment(current.at).isBefore(currentProgressCorrection.at) ? current : acc;
+
+                }, null);
+
+                // ============================================================
+                // Convert work item to enum format for table display
+                // ============================================================
+                const workItem_enum = _toEnum(workItem);
+
+                if (workItem_enum) {
+
+                    const workItemId = workItem.id;
+
+                    // Adapt enum so the link works in gantt view
+                    // Change type/id from work item to project (for navigation)
+                    workItem_enum.type = "Project";
+
+                    workItem_enum.id = workItem.projectId;
+
+                    // Add gantt navigation: links to this specific task in gantt view
+                    workItem_enum.feature = "gantt&itemtype=Phase&itemid=" + workItemId;
+
+                }
+
+                // ============================================================
+                // Add row to table data
+                // ============================================================
+                // Each row contains: [task, new_effort, old_effort, timestamp, user]
+                // (Order matches columns definition above)
+                jtfData.push({
+
+                    id: Pqf.clf.newUuids(1)?.newUuids[0] || "",  // Generate unique row ID
+
+                    data: [
+
+                        workItem_enum,                                    // Column 1: Task name (with link)
+
+                        currentProgressCorrection.remainingEffort,        // Column 2: New effort
+
+                        previousProgressCorrection?.remainingEffort,      // Column 3: Old effort (null if no previous)
+
+                        currentProgressCorrection.at,                     // Column 4: When reassessed
+
+                        _toEnum(currentProgressCorrection.modifiedBy)     // Column 5: Who reassessed it
+
+                    ]
+
+                });
+
+            }
+
+        });
+
+    }
+
+    // ========================================================================
+    // RETURN: Complete JTF object for widget rendering
+    // ========================================================================
+    return constructJtfObject(constructJtfMeta(options, columns, cats), jtfData, [], jtfHints);
+
+}
+
+// ============================================================================
+// EXECUTE: Create the widget with current context
+// ============================================================================
+// 'client' is provided by PQForce sandbox automatically
+// Contains current project, user, and widget settings
+const jtf = createWidget(client);
+
+// Log output for debugging (visible in browser console)
+if (DEBUG)
+    console.log("Generated JTF: " + JSON.stringify(jtf));
+
+// Export the JTF object for widget display
+/* export */ /* default */ jtf;
+ 

@@ -1,0 +1,68 @@
+[
+	{
+		"type": "IMPORT-DELIMITER-TYPE",
+		"id": "IMPORT-DELIMITER-TYPE-COM",
+		"name": [
+			{
+				"code": "en",
+				"text": "Comma"
+			},
+            {
+                "code": "de",
+                "text": "Komma"
+            },
+            {
+                "code": "fr",
+                "text": "Virgule"
+            },
+            {
+                "code": "it",
+                "text": "Virgola"
+            }
+		],
+		"code": null,
+		"description": null,
+		"iconRef": [
+			{
+				"code": "en",
+				"text": "mdi:keyboard"
+			}
+		],
+		"color": null,
+		"validityStart": null,
+		"validityUntil": null
+	},
+	{
+		"type": "IMPORT-DELIMITER-TYPE",
+		"id": "IMPORT-DELIMITER-TYPE-SEM",
+		"name": [
+			{
+				"code": "en",
+				"text": "Semicolon"
+			},
+            {
+                "code": "de",
+                "text": "Semikolon"
+            },
+            {
+                "code": "fr",
+                "text": "Point-virgule"
+            },
+            {
+                "code": "it",
+                "text": "Punto e virgola"
+            }
+		],
+		"code": null,
+		"description": null,
+		"iconRef": [
+			{
+				"code": "en",
+				"text": "mdi:keyboard"
+			}
+		],
+		"color": null,
+		"validityStart": null,
+		"validityUntil": null
+	}
+]

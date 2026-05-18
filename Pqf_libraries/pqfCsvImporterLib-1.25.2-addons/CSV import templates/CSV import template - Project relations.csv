@@ -1,0 +1,2 @@
+﻿RelationType/id;Relation/id:objectRef;Project/name:sourceRef;ResourceType/id;Resource/emp-sap-no:prop:targetRef;Validation/executed;Validation/info
+ID des Relation Type (zwingend);Hier schreibt das System die Relation-ID zurück;Hier steht die Projekt-Referenz (ID, Name oder Property Ref, auch auf Subobjekt möglich);Ressourcen-Typ (zwingend);Hier steht die Ressourcen-Referenz (ID, Name oder Property Ref);;

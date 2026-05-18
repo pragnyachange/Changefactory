@@ -1,0 +1,56 @@
+{
+  "type": "CockpitWidget",
+  "id": "89A532D20F584726840B9BCBCDB097C4",
+  "name": [
+    {
+      "code": "en",
+      "text": "Reassessed Tasks"
+    },
+    {
+      "code": "de",
+      "text": "Neu eingeschätzte Tasks"
+    }
+  ],
+  "code": "REASSESSED_TASKS",
+  "description": [
+    {
+      "code": "en",
+      "text": "Displays reassessed tasks."
+    },
+    {
+      "code": "de",
+      "text": "Zeigt neu eingeschätzte Tasks an"
+    }
+  ],
+  "iconRef": [
+    {
+      "code": "en",
+      "text": "/images/cockpit-table.png"
+    },
+    {
+      "code": "de",
+      "text": "/images/cockpit-table.png"
+    }
+  ],
+  "color": null,
+  "validityStart": null,
+  "validityUntil": null,
+  "objectType": "Project",
+  "widgetType": "jtf",
+  "definition": "{\r\n    \"source\": {\"category\": \"js\"},\r\n    \"config\": {\r\n        \"view\": \"table\" ,\r\n        \"lifecycle\" : true,\r\n        \"colorscheme\": \"poly\",\r\n        \"decimals\": 2,\r\n        \"legend\": {\"show\": true,\"pos\": null},\r\n        \"showHeader\": true,\r\n        \"properties\": [\r\n            {\r\n                \"type\": \"group\",\r\n                \"title\": [{\"code\": \"en\", \"text\": \"Timeframe\"}, {\"code\": \"de\", \"text\": \"Zeitraum\"}]\r\n            },\r\n            {\r\n                \"id\": \"timerange\",\r\n                \"type\": \"enum\",\r\n                \"label\": [\r\n                    { \r\n                        \"code\": \"en\", \r\n                        \"text\": \"Timeframe\"\r\n                    }, \r\n                    { \r\n                        \"code\": \"de\", \r\n                        \"text\": \"Zeitraum\"\r\n                    }\r\n                ],\r\n                \"hint\": [\r\n                    {\r\n                        \"code\": \"en\",\r\n                        \"text\": \"Select the timeframe for which the tasks that have been reassessed should be displayed.\"\r\n                    },\r\n                    {\r\n                        \"code\": \"de\",\r\n                        \"text\": \"Wählen Sie den Zeitraum, in dem die neu bewerteten Aufgaben angezeigt werden sollen.\"\r\n                    }\r\n                ],\r\n                \"sourceUrl\": \"/API/V2/PF/Enum/TIMEFRAME-TASKS-REASSESSMENT/Values\",\r\n                \"selectedItem\": \"TIMEFRAME-TASKS-REASSESSMENT-001\"\r\n            }\r\n        ]\r\n    },\r\n    \"projectStatusFilter\" : null,\r\n    \"options\": {\"disableFilter\": false,\"disableSorting\": false},\r\n    \"canReload\": false\r\n}\r\n",
+  "sortIndex": 100.0,
+  "tags": [
+    [
+      {
+        "code": "en",
+        "text": "Effort"
+      },
+      {
+        "code": "de",
+        "text": "Aufwand"
+      }
+    ]
+  ],
+  "category": null,
+  "sandboxId": "82F6A863771E4D839876BF6668BD3E08"
+}

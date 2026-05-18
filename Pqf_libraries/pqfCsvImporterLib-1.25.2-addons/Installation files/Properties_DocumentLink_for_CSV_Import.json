@@ -1,0 +1,211 @@
+[
+	{
+		"type": "PropertyDefinition",
+		"id": "doc-group-01",
+		"objectType": "DocumentLink",
+		"sortIndex": 0,
+		"label": [
+			{
+				"code": "de",
+				"text": "Datenimport"
+			},
+			{
+				"code": "en",
+				"text": "Data Import"
+			}
+		],
+		"identifier": null,
+		"hint": [
+			{
+				"code": "de",
+				"text": "Diese Eingaben sind nur relevant und sichtbar für <b>CSV-Dokumente im Importordner der Bibliothek</b>."
+			},
+			{
+				"code": "en",
+				"text": "These entries are only relevant and visible for <b>CSV documents in the library's import folder</b>."
+			}
+		],
+		"constraint": "layout.group(open=\"1\",wrap=\"0\",condition=\"doc-is-importable=X\",hint=\"inline\")"
+	},
+	{
+		"type": "PropertyDefinition",
+		"id": "doc-is-importable",
+		"objectType": "DocumentLink",
+		"sortIndex": 1,
+		"label": [
+			{
+				"code": "de",
+				"text": "Importierbar?"
+			},
+			{
+				"code": "en",
+				"text": "Importable?"
+			}
+		],
+		"identifier": null,
+		"hint": null,
+		"constraint": "boolean(width=\"5\",hidden=\"1\",readonly=\"0\")"
+	},
+	{
+		"type": "PropertyDefinition",
+		"id": "doc-import-type",
+		"objectType": "DocumentLink",
+		"sortIndex": 2,
+		"label": [
+			{
+				"code": "de",
+				"text": "Typ der Importdaten"
+			},
+			{
+				"code": "en",
+				"text": "Type of Import Data"
+			}
+		],
+		"identifier": null,
+		"hint": null,
+		"constraint": "enum(width=\"5\",sourceurl=\"/API/V2/PF/Enum/IMPORT-OBJECT-TYPE/Values\",nameurl=\"/API/V2/PF/Enum/IMPORT-OBJECT-TYPE/Value/{id}\",allowempty=\"1\",showicon=\"1\",showdesc=\"0\",showcolor=\"0\",hidden=\"0\",readonly=\"0\")"
+	},
+	{
+		"type": "PropertyDefinition",
+		"id": "doc-line-02a",
+		"objectType": "DocumentLink",
+		"sortIndex": 3,
+		"label": null,
+		"identifier": null,
+		"hint": null,
+		"constraint": "layout.line(wrap=\"0\",grid=\"0\")"
+	},
+	{
+		"type": "PropertyDefinition",
+		"id": "doc-processing-type",
+		"objectType": "DocumentLink",
+		"sortIndex": 4,
+		"label": [
+			{
+				"code": "de",
+				"text": "Art der Verarbeitung"
+			},
+			{
+				"code": "en",
+				"text": "Type of Processing"
+			}
+		],
+		"identifier": null,
+		"hint": null,
+		"constraint": "enum(width=\"5\",sourceurl=\"/API/V2/PF/Enum/IMPORT-PROCESSING-TYPE/Values\",nameurl=\"/API/V2/PF/Enum/IMPORT-PROCESSING-TYPE/Value/{id}\",allowempty=\"1\",showicon=\"1\",showdesc=\"0\",showcolor=\"0\",hidden=\"0\",readonly=\"0\")"
+	},
+	{
+		"type": "PropertyDefinition",
+		"id": "doc-line-02b",
+		"objectType": "DocumentLink",
+		"sortIndex": 4.1,
+		"label": null,
+		"identifier": null,
+		"hint": null,
+		"constraint": "layout.line(wrap=\"0\",grid=\"0\")"
+	},
+	{
+		"type": "PropertyDefinition",
+		"id": "doc-delimiter-type",
+		"objectType": "DocumentLink",
+		"sortIndex": 4.2,
+		"label": [
+			{
+				"code": "de",
+				"text": "Delimiter für CSV Dokument"
+			},
+			{
+				"code": "en",
+				"text": "Delimiter for CSV Document"
+			}
+		],
+		"identifier": null,
+		"hint": [
+            {
+                "code": "de",
+                "text": "Der Delimiter, der in der CSV-Datei verwendet wird. Dieses Feld ist optional - standardmäßig wird ein Semikolon verwendet."
+            },
+            {
+                "code": "en",
+                "text": "The delimiter used in the CSV file. This field is optional - by default a semicolon is used."
+            }
+        ],
+		"constraint": "enum(width=\"5\",sourceurl=\"/API/V2/PF/Enum/IMPORT-DELIMITER-TYPE/Values\",nameurl=\"/API/V2/PF/Enum/IMPORT-DELIMITER-TYPE/Value/{id}\",allowempty=\"1\",showicon=\"1\",showdesc=\"0\",showcolor=\"0\",hidden=\"0\",readonly=\"0\")"
+	},
+	{
+		"type": "PropertyDefinition",
+		"id": "doc-line-03",
+		"objectType": "DocumentLink",
+		"sortIndex": 5,
+		"label": null,
+		"identifier": null,
+		"hint": null,
+		"constraint": "layout.line(wrap=\"0\",grid=\"0\")"
+	},
+	{
+		"type": "PropertyDefinition",
+		"id": "doc-do-process",
+		"objectType": "DocumentLink",
+		"sortIndex": 6,
+		"label": [
+			{
+				"code": "de",
+				"text": "Verarbeiten?"
+			},
+			{
+				"code": "en",
+				"text": "Process?"
+			}
+		],
+		"identifier": null,
+		"hint": [
+			{
+				"code": "de",
+				"text": "Sollen die Daten ensprechend der aktuellen Einstellungen verarbeitet werden? Dieses Flag wird nach der Verarbeitung automatisch zurückgesetzt."
+			},
+			{
+				"code": "en",
+				"text": "Should the data be processed according to the current settings? This flag will be automatically reset after processing."
+			}
+		],
+		"constraint": "boolean(width=\"5\",hidden=\"0\",readonly=\"0\")"
+	},
+	{
+		"type": "PropertyDefinition",
+		"id": "doc-line-01",
+		"objectType": "DocumentLink",
+		"sortIndex": 7,
+		"label": null,
+		"identifier": null,
+		"hint": null,
+		"constraint": "layout.line(wrap=\"0\",grid=\"0\")"
+	},
+	{
+		"type": "PropertyDefinition",
+		"id": "doc-processing-log",
+		"objectType": "DocumentLink",
+		"sortIndex": 8,
+		"label": [
+			{
+				"code": "de",
+				"text": "Verarbeitungs-Log"
+			},
+			{
+				"code": "en",
+				"text": "Processing Log"
+			}
+		],
+		"identifier": null,
+		"hint": [
+			{
+				"code": "de",
+				"text": "Es werden maximal eine bestimmte Anzahl von Log-Einträgen gespeichert. Die Anzahl kann in der JS-Library festgelegt werden."
+			},
+			{
+				"code": "en",
+				"text": "A maximum number of log entries will be saved. The number can be set in the JS library."
+			}
+		],
+		"constraint": "html(width=\"5\",hidden=\"0\",readonly=\"1\")"
+	}
+]

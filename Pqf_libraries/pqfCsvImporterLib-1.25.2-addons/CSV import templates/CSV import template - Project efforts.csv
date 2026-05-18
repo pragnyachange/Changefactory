@@ -1,0 +1,3 @@
+﻿Project/ProjectMeta/prjmeta-no:prop:parentRef;ProjectWorkItem/code:ignoreIfMissing;Resource/HRM-RES-TYP-EMP/emp-sap-no:prop;ProjectEffortActual/id:objectRef;ProjectEffortActual/day;ProjectEffortActual/duration;ProjectEffortActual/comment;Validation/executed;Validation/info
+12345;XYZ;2;;11.06.2024;PT2H55M;Erster Import per CSV-Importer;;
+12345;ABC;2;;12.06.2024;2:45;Zweiter Import per CSV-Importer;;

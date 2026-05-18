@@ -1,0 +1,934 @@
+// Default for lifecycle notifications
+// Created for INTRASOFT by SM/DH, 02.07.2024 (latest update: 14.02.2025)
+// 
+// NOTE: This JS is no longer based on HTML email templates and the function Pqf.msg.sendMailByTemplate.
+//       Instead it is now based on the function sendNotification3 from the pqfBasicLib
+// -----------------------------------------------------------------------------
+
+
+"use strict";
+
+const DEBUG = true;
+
+const blockedMail = new Set(["support@pqforce.com", "info@pqforce.com"]);
+
+const MAIL_SKIN = {
+	'darkFontColor': '#07074E', // PQFORCE dark blue
+	'lightFontColor': '#FFFFFF', // white
+	'darkBackgroundColor': '#DB5656', // PQF red
+	'lightBackgroundColor': '#F7F7F7', // light gray
+	'testingAlertFontColor': '#FFFFFF', // white
+	'testingAlertBackgroundColor': '#FF0000', // red
+	'logoSrc': 'https://www.pqforce.com/logo-colour-a.png',
+	'logoLink': 'https://www.pqforce.com',
+	'logoAlt': 'PQFORCE Logo',
+	'bodyMessageMode': 'dark',
+	'textAlign': 'left',
+	'testing': true
+};
+
+let getLastLifecycleStates = function(type, id) {
+// Returns the two last lifecycle states of the object, null if it does not exist
+// {
+//    "current": current state
+//    "last": last state
+//	  "remark": last remark
+// }
+    try {
+        let history = Pqf.lcy.getObjectHistory(type, id);
+        if (history && history.length) {
+			let currentState = history[history.length - 1].state;
+			let lastState = (history.length > 1 ? history[history.length - 2].state : null);
+			let remark = history[history.length - 1].remark;
+            return {
+				"current": currentState,
+				"last": lastState,
+				"remark": remark
+			};
+        } else {
+            return {
+				"current": null,
+				"last": null,
+				"remark": null
+			};
+        }
+    } catch (err) {
+        // i.e. when object was deleted ...
+		DEBUG ? console.warn("Cannot get object history of object with type " + type + " and id " + id ) : null;
+		DEBUG ? console.warn(err) : null;
+		return {
+			"current": null,
+			"last": null,
+			"remark": null
+		};
+    }
+};
+
+let getObjectInfos = function(type, id, objectStates) {
+// Returns object details incl parent infos of the object defined by type and id.
+// object = {
+//		name: string
+//		type: string
+//      typeName: string
+//		id: string
+//		description: string
+//		url: string
+//		stateNow: {id: string, name: string}
+//		stateBefore: {id: string, name: string}
+//		remark: string
+//		parent = {
+//			name: string
+//			type: string
+//		    typeName: string
+//			id: string
+//			description: string
+//			url: string
+//		}
+// }
+	let objectInfos = {};
+	objectInfos.type = type;
+	objectInfos.id = id;
+	objectInfos.url = Pqf.main.getObjectUrl(type, id);
+	objectInfos.stateNow = objectStates.current;
+	objectInfos.stateBefore = objectStates.last;
+	objectInfos.remark = objectStates.remark;
+	objectInfos.parent = null;
+    switch(type) {
+        case "Project":
+			let project = null;
+			try {
+				project = Pqf.pm.getProject(id);
+				objectInfos.name = project.name;
+				objectInfos.description = project.description;
+			} catch(err) {
+                console.error("Could not get project with id " + id);
+			}
+			break;
+        case "Todo":
+			let todo = null;
+			try {
+				todo = Pqf.pi.getProjectItem("Todo", id);
+				objectInfos.name = todo.name;
+				objectInfos.description = todo.description;
+			} catch(err) {
+                console.error("Could not get meeting with id " + id);
+			}
+			break;
+        case "Meeting":
+			let meeting = null;
+			try {
+				meeting = Pqf.mtg.getMeeting(id);
+				objectInfos.name = meeting.name;
+				objectInfos.description = meeting.description;
+			} catch(err) {
+                console.error("Could not get meeting with id " + id);
+			}
+			break;
+        case "FieldOfAction":
+			let foa = null;
+            try {
+				foa = Pqf.stg.getFieldOfAction(id);
+				objectInfos.name = foa.name;
+				objectInfos.description = foa.description;
+			} catch(err) {
+                console.error("Could not get field of action with id " + id);
+			}
+			break;
+        case "Scenario": // Consider relations to parent project
+            let scenario = null;
+            try {
+                scenario = Pqf.pm.getProjectScenario(id);
+				objectInfos.name = scenario.name;
+				objectInfos.description = scenario.description;
+				let project = null;
+				try {
+					project = Pqf.pm.getProject(scneario.projectId);
+					objectInfos.parent = {
+						"id": project.id,
+						"type": "Project",
+						"name": project.name,
+						"description": project.description,
+						"url": Pqf.main.getObjectUrl("Project", project.id)
+					};
+				} catch(err) {
+					console.error("Could not get project with id " + id);					
+				}
+            } catch(err) {
+                console.error("Could not get scenario with id " + id);
+            }
+            break;
+        case "ProjectContribution": // Consider relations to parent project
+            let projectContribution = null;
+            try {
+                projectContribution = Pqf.stg.getProjectContribution(id);
+				objectInfos.name = projectContribution.name;
+				objectInfos.description = projectContribution.description;
+				let project = null;
+				try {
+					project = Pqf.pm.getProject(projectContribution.projectId);
+					objectInfos.parent = {
+						"id": project.id,
+						"type": "Project",
+						"name": project.name,
+						"description": project.description,
+						"url": Pqf.main.getObjectUrl("Project", project.id)
+					};
+				} catch(err) {
+					console.error("Could not get project with id " + id);					
+				}
+            } catch(err) {
+                console.error("Could not get project contribution with id " + id);
+            }
+            break;
+        default: // Assume project or portfolio report type, and consider relations to parent object
+			let report = null;
+            try {
+                let reportTypes = Pqf.pm.getProjectReportTypes().map(x => x.id);
+                if(reportTypes.includes(type)) { // object is project report
+                    report = Pqf.pm.getProjectReport(type, id, null, null);
+					objectInfos.name = report.name;
+					objectInfos.description = report.description;
+					let project = null;
+					try {
+						project = Pqf.pm.getProject(report.projectId);
+						objectInfos.parent = {
+							"id": project.id,
+							"type": "Project",
+							"name": project.name,
+							"description": project.description,
+							"url": Pqf.main.getObjectUrl("Project", project.id)
+						};
+					} catch(err) {
+						console.error("Could not get project with id " + id);
+					}
+                } else {
+                    reportTypes = Pqf.pm.getProjectPortfolioReportTypes().map(x => x.id);
+                    if(reportTypes.includes(type)) { // object is portfolio report
+                        report = Pqf.pm.getProjectPortfolioReport(type, id);
+						objectInfos.name = report.name;
+						objectInfos.description = report.description;
+						let portfolio = null;
+						try {
+							portfolio = Pqf.pm.getProject(report.projectPortfolioId);
+							objectInfos.parent = {
+								"id": portfolio.id,
+								"type": "ProjectPortfolio",
+								"name": portfolio.name,
+								"description": portfolio.description,
+								"url": Pqf.main.getObjectUrl("ProjectPortfolio", portfolio.id)
+							};
+						} catch(err) {
+							console.error("Could not get project portfolio with id " + id);
+						}
+                    }
+                }
+            } catch(err) {
+                console.error("Could not get report of type " + type + " and id " + id);
+            }
+            break;
+    }
+	return objectInfos;
+}
+
+let getDeciders = function(objectInfos, stateId) {
+// Returns an array of persons (objects, see below) that may decide how lifecycle continues:
+// {
+//    "name": username
+//    "email": email
+//    "resourceName: name of the resource
+// }
+    let resultSet = new Set();
+	let relations = null;
+	let typeForRelations = null;
+	let idForRelations = null;
+	try {
+		typeForRelations = objectInfos.type;
+		idForRelations = objectInfos.id;
+		if (objectInfos.parent) { // check relations to parent object
+			typeForRelations = objectInfos.parent.type;
+			idForRelations = objectInfos.parent.id;
+		}
+		relations = Pqf.pf.getForwardRelations(typeForRelations, idForRelations, "HRM-RES-TYP-EMP", null, null, true).map(rel => rel.target.id);
+	} catch (err) {
+		console.error("Cannot get relations of object of type " + typeForRelations + " and id " + typeForRelations);
+	}
+	if(relations && relations.length > 0) {
+		let cube = null;
+		try {
+			cube = Pqf.acm.getPermissionCubeForObject(objectInfos.type, objectInfos.id, false);
+		} catch(err) {
+			console.error("Cannot get permission cube for object of type " + type + " and id " + id);
+		}
+		if(cube) {
+			let s = cube.states.map(ste => ste ? ste.id : null).indexOf(stateId);
+			if(s != -1) {
+				
+				// Check for each user if they are eligible for notifications
+				for (let u = 0; u < cube.users.length; u++) {
+					let user = cube.users[u];
+					DEBUG ? console.log("User = " + user.name) : null;
+					if(user.resource && user.resource.type === "HRM-RES-TYP-EMP") {
+						if (relations.includes(user.resource.id)) {
+							if (user.receiveNotifications && user.email) {
+								if (!blockedMail.has(user.email.toLowerCase())) {
+									DEBUG ? console.log("User resource = " + user.resource.name) : null;
+									let numTransitions = cube.byUserState[u][s].transitions
+										.filter(trn =>
+											(trn.grant === "ALLOW" &&
+											 trn.transition.from.id != trn.transition.to.id)) // commenting does not count as a transition
+										.length;
+									DEBUG ? console.log("Num transitions allowed = " + numTransitions) : null;
+									if (numTransitions > 1) { // User is allowed to follow at least 2 transitions away from the lifecycle state
+										DEBUG ? console.log("Notifying " + user.email) : null;
+										let resource = Pqf.res.getResource(user.resource.id);
+										let receiver = {
+											"name": user.name,
+											"email": user.email.toLowerCase(),
+											"resourceName": resource.name
+										};
+										resultSet.add(receiver);
+									} else {
+										DEBUG ? console.log("Too few transitions to decide") : null;
+									}
+								} else {
+									DEBUG ? console.log("User's email address is blocked, probably because it is the current user") : null;
+								}
+							} else {
+								DEBUG ? console.log("Notification flag is unchecked (or user has no email address - very unlikely)") : null;
+							}
+						} else {
+							DEBUG ? console.log("User's resource has no relation to object of type " + typeForRelations + " and id " + idForRelations) : null;
+						}
+					} else {
+						DEBUG ? console.log("User has no linked resource") : null;
+					}
+				}
+					
+			} else {
+				console.warn("State with id " + stateId + " not found in permission cube");
+			}
+		}
+	} else {
+		DEBUG ? console.log("No relations found for object of type " + typeForRelations + " and id " + idForRelations) : null;
+	}
+    return Array.from(resultSet);
+};
+
+let getLanguage = function(email) {
+// Get the language of a user by its email
+	let users = Pqf.acm.getUsers(null, null, null, email);
+	if (!users || !users.length) return null;
+	let langs = users.filter((usr) => usr.language).map((usr) => usr.language);
+	return langs.length ? langs[0] : null;
+};
+
+let getActorInfos = function() {
+	let myself = pqfLib.resources.getCurrentUser();
+	let actorInfos = {
+		"name": myself.userName,
+		"email": myself.userEmail,
+		"resource": myself.resourceName
+	};
+	return actorInfos;
+}
+
+let createMailDecisionRequest = function(receiverInfos, actorInfos, objectInfos, language) {
+// Used to generate notification emails ***for users that are allowed to take a
+// decision*** because the object has reached a lifecycle state with a decision
+// flag set. The function receives specific arguments (see below) that can be
+// used to populate the subject and body of the email.
+//
+// Expected return value: {"subject": string, "body": string}
+//
+// Arguments received (in this order):
+//
+// User that receives the notification and can decide
+// receiverInfos = {
+//		name: string (username)
+//		email: string
+//		resourceName: string | null (only present if user has resource)
+// }
+//
+// User that requested the decision and thus triggered the notification
+// actorInfos = {
+//		name: string (username)
+//		email: string
+//		resourceName: string | null (only present if user has resource)
+// }
+//
+// Object for which the decision request was made
+// objectInfos = {
+//		name: string
+//		type: string
+//		typeName: string
+//		id: string
+//		description: string
+//		url: string
+//		stateNow: {id: string, name: string}
+//		stateBefore: {id: string, name: string}
+//		parent = {
+//			name: string
+//			type: string
+//			typeName: string
+//			id: string
+//			description: string
+//			url: string
+//		}
+// }
+//
+// language: "de" | "fr" | "it" | "en-ch" | null
+//
+    let subject = "";
+	let intro = getIntro(receiverInfos, language);
+    let body = getBody(objectInfos, language);
+	let outro = getOutro(objectInfos, language);
+    let actorName = getActorName(actorInfos, language);
+	
+	switch(language) {
+		case "de":
+			subject = "Entscheidungsanfrage für " + objectInfos.name;
+			intro += "<p><b>" + actorName + "</b> hat <b>" + objectInfos.name + "</b> zur Genehmigung übergeben.</p>";
+			break;
+		case "fr":
+			subject = "Demandes de decision pour " + objectInfos.name;
+			intro += "<p><b>" + actorName + "</b> a soumis <b>" + objectInfos.name + "</b> pour approbation.</p>";
+			break;
+		case "it":
+			subject = "Richieste di approvazione per " + objectInfos.name;
+			intro += "<p><b>" + actorName + "</b> ha inviato <b>" + objectInfos.name + "</b> per l'approvazione.</p>";
+			break;
+		default:
+			subject = "Approval requests for " + objectInfos.name;
+			intro += "<p><b>" + actorName + "</b> has submitted <b>" + objectInfos.name + "</b> for approval.</p>";
+	}
+
+	return {
+		"subject": subject,
+		"intro": intro,
+		"body": body,
+		"outro": outro
+	};
+}
+
+let createMailDecisionTakenForRequester = function(receiverInfos, deciderInfos, objectInfos, language) {
+// Used to generate notification emails ***for users that requested a
+// decision*** because they put the object in a lifecycle state with a decision
+// flag set. The function receives specific arguments (see below) that can be
+// used to populate the subject and body of the email.
+//
+// Expected return value: {"subject": string, "body": string}
+//
+// Arguments received (in this order):
+//
+// User that receives the notification because they requested the decision 
+// receiverInfos = {
+//		name: string (username)
+//		email: string
+//		resourceName: string | null (only present if user has resource)
+// }
+//
+// User that decided and thus triggered the notification
+// deciderInfos = {
+//		name: string (username)
+//		email: string
+//		resourceName: string | null (only present if user has resource)
+// }
+//
+// Object for which the decision request was made
+// objectInfos = {
+//		name: string
+//		type: string
+//		typeName: string
+//		id: string
+//		description: string
+//		url: string
+//		stateNow: {id: string, name: string}
+//		stateBefore: {id: string, name: string}
+//		parent = {
+//			name: string
+//			type: string
+//			typeName: string
+//			id: string
+//			description: string
+//			url: string
+//		}
+// }
+//
+// language: "de" | "fr" | "it" | "en-ch" | null
+//
+    let subject = "";
+	let intro = getIntro(receiverInfos, language);
+    let body = getBody(objectInfos, language);
+	let outro = getOutro(objectInfos, language);
+    let actorName = getActorName(actorInfos, language);
+	let receiverName = (receiverInfos.resourceName ? receiverInfos.resourceName  : (receiverInfos.name ? receiverInfos.name : null));
+	switch(language) {
+		case "de":
+			subject = "Entscheid für " + objectInfos.name + " gefällt";
+			intro += "<p><b>" + actorName + "</b> hat zu <b>" + objectInfos.name + "</b> eine Entscheidung gefällt.";
+			break;
+		case "fr":
+			subject = "Décision pour " + objectInfos.name + " prise";
+			intro += "<b>" + actorName + "</b> a pris une décision concernant <b>" + objectInfos.name + "</b>.";
+			break;
+		case "it":
+			subject = "Decisione per " + objectInfos.name + " presa";
+			intro += "<b>" + actorName + "</b> ha preso una decisione in merito a <b>" + objectInfos.name + "</b>.";
+			break;
+		default:
+			subject = "Decision for " + objectInfos.name + " taken";
+			intro += "<p><b>" + actorName + "</b> has taken a decision for <b>" + objectInfos.name + "</b>.</p>";
+	}
+
+	return {
+		"subject": subject,
+		"intro": intro,
+		"body": body,
+		"outro": outro
+	};
+}
+
+let createMailDecisionTakenForOtherDeciders = function(requesterInfos, receiverInfos, actorInfos, objectInfos, language) {
+// Used to generate notification emails ***for users that also could have taken
+// a decision*** because they hat the permissions but didn't take the action.
+// The function receives specific arguments (see below) that can be used to
+// populate the subject and body of the email.
+//
+// Expected return value: {"subject": string, "body": string}
+//
+// Arguments received (in this order):
+//
+// User that originally requested the decision
+// requesterInfos = {
+//		name: string (username)
+//		email: string
+//		resourceName: string | null (only present if user has resource)
+// }
+//
+// User that receives the notification because they could have taken a decision 
+// receiverInfos = {
+//		name: string (username)
+//		email: string
+//		resourceName: string | null (only present if user has resource)
+// }
+//
+// User that decided and thus triggered the notification
+// actorInfos = {
+//		name: string (username)
+//		email: string
+//		resourceName: string | null (only present if user has resource)
+// }
+//
+// Object for which the decision request was made
+// objectInfos = {
+//		name: string
+//		type: string
+//		typeName: string
+//		id: string
+//		description: string
+//		url: string
+//		stateNow: {id: string, name: string}
+//		stateBefore: {id: string, name: string}
+//		parent = {
+//			name: string
+//			type: string
+//			typeName: string
+//			id: string
+//			description: string
+//			url: string
+//		}
+// }
+//
+// language: "de" | "fr" | "it" | "en-ch" | null
+//
+    let subject = "";
+	let intro = getIntro(receiverInfos, language);
+    let body = getBody(objectInfos, language);
+	let outro = getOutro(objectInfos, language);
+    let actorName = getActorName(actorInfos, language);
+	let receiverName = (receiverInfos.resourceName ? receiverInfos.resourceName  : (receiverInfos.name ? receiverInfos.name : null));
+
+	switch(language) {
+		case "de":
+			subject = "Entscheid für " + objectInfos.name + " gefällt";
+			intro += "<p><b>" + actorName + "</b> hat zu <b>" + objectInfos.name + "</b> eine Entscheidung gefällt, die du auch hättest fällen können.</p>";
+			break;
+		case "fr":
+			subject = "Décision pour " + objectInfos.name + " prise";
+			intro += "<p><b>" + actorName + "</b> a pris une décision concernant <b>" + objectInfos.name + "</b> que tu aurais pu prendre.</p>";
+			break;
+		case "it":
+			subject = "Decisione per " + objectInfos.name + " presa";
+			intro += "<b>" + actorName + "</b> ha preso una decisione in merito a <b>" + objectInfos.name + "</b> che avreste potuto prendere anche voi.</p>";
+			break;
+		default:
+			subject = "Decision for " + objectInfos.name + " taken";
+			intro += "<p><b>" + actorName + "</b> has taken a decision for <b>" + objectInfos.name + "</b> which you could have taken too.</p>";
+	}
+
+	return {
+		"subject": subject,
+		"intro": intro,
+		"body": body,
+		"outro": outro
+	};
+}
+
+let getActorName = function(actorInfos, lang) {
+	let actorName = "";
+	switch (lang) {
+		case "de":
+			actorName = "[unbekannt]";
+			break;
+		case "fr":
+			actorName = "[unconnu]";
+			break;
+		case "it":
+			actorName = "[sconosciuto]";
+			break;		
+		default:
+			actorName = "[unknown]";
+	}
+	actorName = (actorInfos && actorInfos.resourceName ? actorInfos.resourceName : (actorInfos && actorInfos.name ? actorInfos.name : actorName)) + (actorInfos && actorInfos.email ? " (" + actorInfos.email + ")" : "");
+	return actorName;
+}
+
+let getRemarkLabel = function(lang) {
+	let remarkLabel = "";
+    switch(lang) {
+        case "de":
+            remarkLabel += "Kommentar";
+			break;
+        case "fr":
+            remarkLabel += "Commentaire";
+			break;
+        case "it":
+            remarkLabel += "Commento";
+			break;
+        default:
+            remarkLabel += "Comment";
+    }
+	return remarkLabel;
+}
+
+let getNoRemarkText = function(lang) {
+	let noRemarkText = "";
+    switch(lang) {
+        case "de":
+            noRemarkText += "[kein Kommentar]";
+			break;
+        case "fr":
+            noRemarkText += "[pas de ommentaire]";
+			break;
+        case "it":
+            noRemarkText += "[no commento]";
+			break;
+        default:
+            noRemarkText += "[no comment]";
+    }
+	return noRemarkText;
+}
+
+let getCurrentStateLabel = function(lang) {
+	let currentStateLabel = "";
+    switch(lang) {
+        case "de":
+            currentStateLabel += "Aktueller Zustand";
+			break;
+        case "fr":
+            currentStateLabel += "État actuel";
+			break;
+        case "it":
+            currentStateLabel += "Condizione attuale";
+			break;
+        default:
+            currentStateLabel += "Current state";
+    }
+	return currentStateLabel;
+}
+
+let addLanguageToObjectInfos = function(objectInfos, lang) {
+
+    switch(objectInfos.type) {
+        case "Project":
+			switch(lang) {
+				case "de":
+					objectInfos.typeName = "Projekt";
+					break;
+				case "fr":
+					objectInfos.typeName = "Projet";
+					break;
+				case "it":
+					objectInfos.typeName = "Progetto";
+					break;
+				default:
+					objectInfos.typeName = "Project";
+			}
+			break;
+        case "Todo":
+			switch(lang) {
+				case "de":
+					objectInfos.typeName = "Todo";
+					break;
+				case "fr":
+					objectInfos.typeName = "Todo";
+					break;
+				case "it":
+					objectInfos.typeName = "Todo";
+					break;
+				default:
+					objectInfos.typeName = "Todo";
+			}
+			break;
+        case "Meeting":
+			switch(lang) {
+				case "de":
+					objectInfos.typeName = "Meeting";
+					break;
+				case "fr":
+					objectInfos.typeName = "Séance";
+					break;
+				case "it":
+					objectInfos.typeName = "Inconto";
+					break;
+				default:
+					objectInfos.typeName = "Meeting";
+			}
+			break;
+        case "FieldOfAction":
+			switch(lang) {
+				case "de":
+					objectInfos.typeName = "Handlungsfeld";
+					break;
+				case "fr":
+					objectInfos.typeName = "Champ d'action";
+					break;
+				case "it":
+					objectInfos.typeName = "Campo d'azione";
+					break;
+				default:
+					objectInfos.typeName = "Field of action";
+			}
+			break;
+        case "Scenario": // Consider relations to parent project
+			switch(lang) {
+				case "de":
+					objectInfos.typeName = "Szenario";
+					objectInfos.parent.typeName = "Projekt";
+					break;
+				case "fr":
+					objectInfos.typeName = "Scénario";
+					objectInfos.parent.typeName = "Projet";
+					break;
+				case "it":
+					objectInfos.typeName = "Scenario";
+					objectInfos.parent.typeName = "Progetto";
+					break;
+				default:
+					objectInfos.typeName = "Scenario";
+					objectInfos.parent.typeName = "Project";
+			}
+            break;
+        case "ProjectContribution": // Consider relations to parent project
+			switch(lang) {
+				case "de":
+					objectInfos.typeName = "Projektbeitrag";
+					objectInfos.parent.typeName = "Projekt";
+					break;
+				case "fr":
+					objectInfos.typeName = "Contribution au projet";
+					objectInfos.parent.typeName = "Projet";
+					break;
+				case "it":
+					objectInfos.typeName = "Contributo al progetto";
+					objectInfos.parent.typeName = "Progetto";
+					break;
+				default:
+					objectInfos.typeName = "Project contribution";
+					objectInfos.parent.typeName = "Project";
+			}
+            break;
+        default: // Assume project or portfolio report type
+			let reportType = null;
+			switch (objectInfos.parent.type) {
+				case "ProjectPortfolio": 
+					// TODO: Need a request that allows to specify the language!
+					reportType = Pqf.pm.getProjectPortfolioReportType(objectInfos.type);
+					switch(lang) {
+						case "de":
+							objectInfos.typeName = reportType.name;
+							objectInfos.parent.typeName = "Projektportfolio";
+							break;
+						case "fr":
+							objectInfos.typeName = reportType.name;
+							objectInfos.parent.typeName = "Portefeuille de projet";
+							break;
+						case "it":
+							objectInfos.typeName = reportType.name;
+							objectInfos.parent.typeName = "Portfolio de progetto";
+							break;
+						default:
+							objectInfos.typeName = reportType.name;
+							objectInfos.parent.typeName = "Project portfolio";
+					}
+					break;
+				case "Project":
+					// TODO: Need a request that allows to specify the language!
+					reportType = Pqf.pm.getProjectReportType(objectInfos.type);
+					switch(lang) {
+						case "de":
+							objectInfos.typeName = reportType.name;
+							objectInfos.parent.typeName = "Projekt";
+							break;
+						case "fr":
+							objectInfos.typeName = reportType.name;
+							objectInfos.parent.typeName = "Projet";
+							break;
+						case "it":
+							objectInfos.typeName = reportType.name;
+							objectInfos.parent.typeName = "Progetto";
+							break;
+						default:
+							objectInfos.typeName = reportType.name;
+							objectInfos.parent.typeName = "Project";
+					}
+					break;				
+			}
+    }
+
+	return objectInfos;
+}
+
+let getIntro = function(receiverInfos, lang) {
+	let intro = "";
+    switch(lang) {
+        case "de":
+            intro += "<p>" + (receiverInfos.resourceName ? "Hallo " + receiverInfos.resourceName + "!" : (receiverInfos.name ? "Hallo " + receiverInfos.name + "!" : "Hallo!")) + "</p>";
+			break;
+        case "fr":
+            intro += "<p>" + (receiverInfos.resourceName ? "Salut " + receiverInfos.resourceName + "!" : (receiverInfos.name ? "Salut " + receiverInfos.name + "!" : "Salut!")) + "</p>";
+			break;
+        case "it":
+            intro += "<p>" + (receiverInfos.resourceName ? "Ciao " + receiverInfos.resourceName + "!" : (receiverInfos.name ? "Ciao " + receiverInfos.name + "!" : "Ciao!")) + "</p>";
+			break;
+        default:
+            intro += "<p>" + (receiverInfos.resourceName ? "Hello " + receiverInfos.resourceName + "!" : (receiverInfos.name ? "Hello " + receiverInfos.name + "!" : "Hello!")) + "</p>";
+    }
+	return intro;
+}
+
+let getBody = function(objectInfos, lang) {
+	let body = "<ul>";
+	let currentStateLabel = getCurrentStateLabel(lang);
+	let remarkLabel = getRemarkLabel(lang);
+	let noRemarkText = getNoRemarkText(lang);
+
+	body += "<li><b>" + objectInfos.typeName + "</b>:  <a href='" + objectInfos.url + "'>" + objectInfos.name + "</a></li>"
+	body += "<li><b>" + currentStateLabel + "</b>: " + objectInfos.stateNow.name + "</li>";
+	if (objectInfos.parent) {
+		body += "<li><b>" + objectInfos.parent.typeName + "</b>: <a href='" + objectInfos.parent.url + "'>" + objectInfos.parent.name + "</a></li>"
+	}
+	body += "<li><b>" + remarkLabel + "</b>: " + (objectInfos.remark ? objectInfos.remark : noRemarkText) + "</li>";
+	body += "</ul>";
+	
+	return body;
+}
+
+let getOutro = function(objectInfos, lang) {
+	let outro = "";
+	switch(lang) {
+		case "de":
+			outro += "<p>Mit diesem <a href=\"" + objectInfos.url + "\">Link</a> gelangst du direkt zum betreffenden Objekt. Bitte antworte nicht auf diese E-Mail.</p>";
+			outro += "<p>PQFORCE Notifikationssystem</p>";
+			break;
+		case "fr":
+			outro += "<p>Ce <a href=\"" + objectInfos.url + "\">lien</a> te mène directement à l'objet en question. Ne réponds pas à cet e-mail.</p>";
+			outro += "<p>Système de notifications de PQFORCE</p>";
+			break;
+		case "it":
+			outro += "<p>Questo <a href=\"" + objectInfos.url + "\">Link</a> vi porterà direttamente all'oggetto in questione. Non rispondere a questa e-mail.</p>";
+			outro += "<p>Sistema di notifica PQFORCE</p>";
+			break;
+		default:
+			outro += "<p>This <a href=\"" + objectInfos.url + "\">link</a> takes you directly to the corresponding object. Please do not reply to this email.</p>";
+			outro += "<p>PQFORCE notification system</p>";
+	}
+	return outro;
+}
+
+
+// -----------------------------------------------------------------------------
+// Main functionality
+// -----------------------------------------------------------------------------
+
+let objectState = getLastLifecycleStates(trigger.objectType, trigger.objectId);
+let actorInfos = getActorInfos();
+if (objectState.current) {
+    if (actorInfos && actorInfos.email) blockedMail.add(actorInfos.email.toLowerCase());
+    DEBUG ? console.log("LCY change: " + trigger.objectType + "|" + trigger.objectId + " : " + (objectState.last ? objectState.last.name : "*") + " -> " + objectState.current.name) : null;
+		
+	// Notify decision request?
+	if (objectState.current.isDecision) {
+		DEBUG ? console.log("Current state " + objectState.current.name + "|" + objectState.current.id + " is decision state.") : null;
+		let objectInfos = getObjectInfos(trigger.objectType, trigger.objectId, objectState);
+		let deciders = getDeciders(objectInfos, objectState.current.id);
+		if (deciders && deciders.length) {
+			DEBUG ? console.log("Notifying " + deciders.length + " users.") : null;
+			for (let decider of deciders) {
+				let lang = getLanguage(decider.email);
+				DEBUG ? console.log("Notifiying " + decider.name + " (" + decider.email + ") about decision to be taken (lang = " + (lang || "en") + ").") : null;
+				objectInfos = addLanguageToObjectInfos(objectInfos, lang);
+				let message = createMailDecisionRequest(decider, actorInfos, objectInfos, lang);
+				pqfLib.mail.sendNotification3([decider.email], message.subject, message.intro, message.body, message.outro, false, MAIL_SKIN, true);
+			}
+			// Save deciders and actor in store
+			let toStore = {
+				"actorInfos": actorInfos,
+				"deciders": deciders
+			};
+			store.save(trigger.objectId, toStore);
+		} else {
+			DEBUG ? console.log("No deciders found.") : null;
+		}
+	}
+	
+	// Notify decision taken
+	if (objectState.last && objectState.last.isDecision) {
+		let fromStore = store.load(trigger.objectId);
+		if (fromStore) {
+			DEBUG ? console.log("Object infos found in store") : null;
+			let objectInfos = getObjectInfos(trigger.objectType, trigger.objectId, objectState);
+
+			// Notify original requester
+			let requesterInfos = fromStore.actorInfos;
+			if (requesterInfos) {
+				let lang = getLanguage(requesterInfos.email);
+				DEBUG ? console.log("Notifiying the requester " + requesterInfos.resourceName + " (" + requesterInfos.name + ", " + requesterInfos.email + ") about decision taken (lang = " + (lang || "en") + ").") : null;
+				objectInfos = addLanguageToObjectInfos(objectInfos, lang);
+				let message = createMailDecisionTakenForRequester(requesterInfos, actorInfos, objectInfos, lang);
+				pqfLib.mail.sendNotification3([requesterInfos.email], message.subject, message.intro, message.body, message.outro, false, MAIL_SKIN, true);
+			}
+
+			// Notify other deciders
+			let deciders = fromStore.deciders;
+			if (deciders) {
+				deciders = deciders.filter(d => d.name != actorInfos.name);
+				for (let decider of deciders) {
+					let lang = getLanguage(decider.email);
+					DEBUG ? console.log("Notifiying other decider " + decider.resourceName + " (" + decider.name + ", " + decider.email + ") about decision taken (lang = " + (lang || "en") + ").") : null;
+					objectInfos = addLanguageToObjectInfos(objectInfos, lang);
+					let message = createMailDecisionTakenForOtherDeciders(requesterInfos, decider, actorInfos, objectInfos, lang);
+					pqfLib.mail.sendNotification3([decider.email], message.subject, message.intro, message.body, message.outro, false, MAIL_SKIN, true);
+				}				
+			}
+
+			// Reset store for this object
+			store.save(trigger.objectId, null);
+		} else {
+			DEBUG ? console.log("Decision taken for object " + trigger.objectType + "|" + trigger.objectId + ", but no infos found in store") : null;
+		}
+	}
+	
+} else {
+    DEBUG ? console.log("LCY change: " + trigger.objectType + "|" + trigger.objectId + " : object may have been deleted") : null;
+}

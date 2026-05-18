@@ -1,0 +1,1 @@
+// This folder contains the code put into the js sandbox of widgets 
