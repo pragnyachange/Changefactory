@@ -880,7 +880,7 @@ function safeGetResource(resourceId) {
     } catch (err) {
         // Graceful degradation: show error marker in Excel instead of crashing
         console.warn("Resource could not be loaded: " + resourceId + " / " + err);
-        RESOURCE_CACHE[resourceId] = { name: "[Resource nicht gefunden: " + resourceId + "]" };
+        RESOURCE_CACHE[resourceId] = { name: "[Resource not found: " + resourceId + "]" };
         return RESOURCE_CACHE[resourceId];
     }
 }
@@ -911,7 +911,7 @@ function safeGetWorkItem(workItemId) {
         console.warn("Work item could not be loaded: " + workItemId + " / " + err);
 
         WORKITEM_CACHE[workItemId] = {
-            name: "[Work Item nicht gefunden: " + workItemId + "]"
+            name: "[Work item not found: " + workItemId + "]"
         };
 
         return WORKITEM_CACHE[workItemId];

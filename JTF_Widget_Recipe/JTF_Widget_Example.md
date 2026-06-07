@@ -1,47 +1,47 @@
 ## This file includes all the steps to recreate the example shown in the JTF forum post
 
-Du erstellst ein Widget in der Cockpit-Ansicht, das auf einer OU (organizational unit) aufrufbar ist und dort eine Tabelle mit Ressourcen zeigt, zum Beispiel:
+You create a widget in the Cockpit view that can be called on an OU (organizational unit) and displays a table of resources there, for example:
 
 - Name
 - E-Mail
 
 
-Damit das funktioniert, brauchst du zwei Dinge:
+For this to work, you need two things:
 
-Eine JS-Sandbox
-    sie sammelt die Daten
-    sie baut daraus ein JTF-Objekt
-    sie gibt dieses Objekt zurück
-Eine CockpitWidget-Definition
-    sie sagt PQFORCE, dass es dieses Widget gibt
-    sie bestimmt, auf welchem Objekttyp das Widget sichtbar ist
-    sie referenziert die Sandbox über die sandboxId
-    sie enthält die Widget-Konfiguration (definition)
+A JS Sandbox
+    it collects the data
+    it builds a JTF object from the data
+    it returns this object
+A CockpitWidget Definition
+    it tells PQFORCE that this widget exists
+    it determines on which object type the widget is visible
+    it references the sandbox via the sandboxId
+    it contains the widget configuration (definition)
 
-Die Reihenfolge ist wichtig:
+The order is important:
 
-Zuerst Sandbox erstellen, dann Widget-Definition anlegen.
+First create the sandbox, then create the widget definition.
 
-Schritt 1: Ziel und Geltungsbereich festlegen:
-    Für dieses Beispiel bedeutet das:
+Step 1: Define goal and scope:
+    For this example, that means:
 
-        Widget-Typ: JTF
-        Zielobjekt: OU
-        Anwendungsfall: Tabelle aller Ressourcen einer OU
-        Angezeigte Spalten:
+        Widget type: JTF
+        Target object: OU
+        Use case: Table of all resources of an OU
+        Displayed columns:
         Name
         E-Mail
-        Optionale Einstellung:
-        Sub-OUs einbeziehen
-        Darstellung: Tabelle
-        Zeitstrahl: ausgeblendet
+        Optional setting:
+        Include Sub-OUs
+        Display: Table
+        Timeline: hidden
 
-    Weil du genau daraus ableitest:
+    Because from this you can derive:
 
-        objectType der Widget-Definition
-        die properties in definition
-        welche Daten die Sandbox laden muss
-        wie meta.columns und data aufgebaut sein müssen
+        objectType of the widget definition
+        the properties in definition
+        what data the sandbox must load
+        how meta.columns and data must be structured
 
 
 
@@ -57,6 +57,8 @@ Okay so we have three files:
 2. Go to bruno (api call " Recreate JTF Widget From Forum")
         - create new PUT request: PUT https://demo.pqforce.com/API/V2/CLF/CockpitWidget/C501F4C74A044D329AF81C0DD9A4F736/WithTranslations //same its just basically saying hey pqforce we are defining a widget here 
 
+        - C501F4C74A044D329AF81C0DD9A4F736 is a randomly generated uuid which u get with: 
+        https://demo.pqforce.com/API/V2/CLF/Uuid/New/1 body= no body
         - in body copy widget_obj.json & REPLACE :
             - L.51 "sandboxId": "4D8288BA0DE04228887A613E6D89F167" with the sandbox ID of the previous created sandbox
 
@@ -108,6 +110,9 @@ Since we can use the same authenticator token always (or actually  until the exp
         - now instead of bearer token we can use inherit and select Bearer token 
         - so now it is inheriting from "Test"
 
+Tips
+1. Print the client object 
+2. Define which API calls you want (check format ie string, array?), check what it gives back in which format?
 
 So the files 
 

@@ -1,5 +1,5 @@
 # Changefactory
-Running javascript file : (go into Javascript_Learning folder first) 
+Running a JavaScript file (go into the Javascript_Learning folder first):
     node filename.js
 
 Git:

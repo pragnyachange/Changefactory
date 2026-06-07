@@ -10,30 +10,12 @@ This JavaScript automation generates a monthly **Activity Report** that exports 
 
 The report is delivered as an Excel file organized by customer, project, task, and employee, enabling management visibility into project progress, resource utilization, and potential overruns.
 
----
 
-## LEVEL 1: THE BROAD IDEA (Business Purpose)
 
-### Problem Statement
-Project managers need to understand:
-1. Are employees working on what was planned?
-2. How much time was allocated vs actually spent?
-3. On which tasks is effort being consumed vs budgeted?
-4. Which employees are over/under their allocations?
-
-### Solution
-This export **automatically reconciles allocation data with time entries** and presents both in a structured report. Instead of manually comparing spreadsheets, managers get a single Excel file showing:
-
-| Customer | Project | Task | Employee | Planned | Actual | Remaining | Current Entry |
-|---|---|---|---|---|---|---|---|
-| Acme Corp | Website Redesign | UI Dev | John | 40h | 25h | 15h | 2h (on May 15) |
-| Acme Corp | Website Redesign | Backend | Sarah | 30h | 28h | 2h | 1.5h (on May 20) |
-
-Each row represents **one time entry**, with the allocation context shown on every row for easy analysis.
 
 ---
 
-## LEVEL 2: ARCHITECTURE (How It Works)
+## ARCHITECTURE (How It Works)
 
 ### High-Level Flow
 
@@ -385,7 +367,7 @@ function safeGetResource(resourceId) {
         return RESOURCE_CACHE[resourceId]
     } catch (err) {
         // 3. Graceful degradation: cache error marker
-        RESOURCE_CACHE[resourceId] = { name: "[Resource nicht gefunden]" }
+        RESOURCE_CACHE[resourceId] = { name: "[Resource not found]" }
         return RESOURCE_CACHE[resourceId]
     }
 }
@@ -393,7 +375,7 @@ function safeGetResource(resourceId) {
 
 **Why This Matters:**
 - If a resource can't be loaded, the entire row doesn't get lost
-- Instead, Excel shows `[Resource nicht gefunden]` as the employee name
+- Instead, Excel shows `[Resource not found]` as the employee name
 - Admins can see what failed and investigate
 - The export still completes successfully
 

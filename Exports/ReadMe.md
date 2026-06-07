@@ -1,4 +1,16 @@
-This file exaplains how to build an Excel export in pqforce using a JavaScript Automation 
+### Debugging Tip: Print the Client Object
+
+To understand how data is structured and accessed, add this snippet to your automation:
+
+```js
+try {
+    console.log('CLIENT: ' + JSON.stringify(client));
+} catch(e) {
+    console.log('CLIENT ERROR: ' + e);
+}
+```
+
+This file explains how to build an Excel export in PQForce using a JavaScript automation.
 
 1. You upload an Excel template that contains placeholder text.
 2. You create a JS automation that builds a JSON object named jsdata.
@@ -23,7 +35,7 @@ The JS automation fetches a project report and project info, then constructs jsd
         - report.status.deliverables
         - report.status.quality
 
-!! PQFORCE only fills the cells with values , all visual behavior comes from the Excel File you design
+**Important:** PQForce only fills the cells with values; all visual behavior comes from the Excel file you design.
 
 ### Steps 
 1. Build the Excel Template 
@@ -135,15 +147,16 @@ A later reply explains why some users could not choose their script in the expor
 5) JS-based Excel exports are available from the Report view. When triggered, pqforce runs the JS automation, gets jsdata, replaces placeholders in the Excel file, and outputs the finished workbook.
 
 
-No API calls needed 
+No API calls needed.
 
-!!! For example on Forum 
-1) Create  a Javascript automation : how is the export supposed to work
-2) Create an Export !!
+### Forum Example
+
+1) Create a JavaScript automation: defines how the export is supposed to work
+2) Create an Export
 ![alt text](image-1.png)
-Important: Object type: Projektreport if you want ansicht Porjektreport
+**Important:** Set the object type to "ProjectReport" if you want the Project Report view.
 ![alt text](image-2.png)
-    - Yellow : Ansicht
-    - Blue : Objecttyp!!
-- Certain Objecttypes have certain views in them.
-- For the anhang its the .xlsx file you created with the placeholders
+    - Yellow: View
+    - Blue: Object type
+- Certain object types have certain views associated with them.
+- For the attachment, use the .xlsx file you created with the placeholders.
