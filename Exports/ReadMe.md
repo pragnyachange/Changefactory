@@ -136,7 +136,7 @@ The important part is the shape of jsdata, because your placeholders must match 
 
 A later reply explains why some users could not choose their script in the export setup: the JS automation must have the category/type EXPORT.
 
-4) Configure the export in pqforce
+4) Configure the export in pqforce customerportal
     - Open the “Exporte” tab.
     - Create a new export.
     - Enter a name.
